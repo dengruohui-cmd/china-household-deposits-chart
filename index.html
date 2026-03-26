@@ -3,68 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>中国居民存款实时曲线 (2015-2025)</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-    <link rel="stylesheet" href="style.css">
+    <title>中国居民存款曲线 - 10年数据</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        #chart { width: 100%; height: 600px; margin: 20px auto; }
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🏦 中国居民存款实时曲线</h1>
-            <p class="subtitle">数据来源：中国人民银行 (PBOC) | 最后更新：<span id="lastUpdate"></span></p>
-        </header>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>当前存款余额</h3>
-                <p class="number" id="currentBalance">--</p>
-                <span class="unit">万亿元</span>
-            </div>
-            <div class="stat-card">
-                <h3>同比增长率</h3>
-                <p class="number" id="yoyGrowth">--</p>
-                <span class="unit">%</span>
-            </div>
-            <div class="stat-card">
-                <h3>本月新增</h3>
-                <p class="number" id="monthlyIncrease">--</p>
-                <span class="unit">万亿元</span>
-            </div>
-        </div>
-
-        <div class="chart-container">
-            <canvas id="depositsChart"></canvas>
-        </div>
-
-        <div class="controls">
-            <button onclick="changeTimeRange(12)">近1年</button>
-            <button onclick="changeTimeRange(36)">近3年</button>
-            <button onclick="changeTimeRange(60)">近5年</button>
-            <button onclick="changeTimeRange(120)" class="active">近10年</button>
-            <button onclick="changeTimeRange('all')">全部</button>
-        </div>
-
-        <div class="data-table-container">
-            <h2>📊 详细数据</h2>
-            <table id="dataTable">
-                <thead>
-                    <tr>
-                        <th>日期</th>
-                        <th>存款余额 (万亿元)</th>
-                        <th>环比增长 (%)</th>
-                        <th>同比增长 (%)</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
-
-        <footer>
-            <p>⚡ 自动更新机制：每月15日自动获取上月数据 | 开源项目 | 仅供参考</p>
-        </footer>
-    </div>
-
-    <script src="script.js"></script>
+    <h1 style="text-align:center">中国居民存款曲线（过去10年）</h1>
+    <div id="chart"></div>
+    
+    <script>
+        // 加载数据
+        fetch('data/deposit_data.json')
+            .then(response => response.json())
+            .then(data => {
+                const chart = echarts.init(document.getElementById('chart'));
+                
+                const option = {
+                    title: { text: '居民存款总额趋势', left: 'center' },
+                    tooltip: { trigger: 'axis' },
+                    xAxis: {
+                        type: 'category',
+                        data: data.deposits.map(d => d.month),
+                        axisLabel: { rotate: 45 }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        name: '万亿元'
+                    },
+                    series: [{
+                        name: '居民存款',
+                        type: 'line',
+                        data: data.deposits.map(d => d.amount),
+                        smooth: true,
+                        areaStyle: {}
+                    }]
+                };
+                
+                chart.setOption(option);
+            });
+    </script>
 </body>
 </html>
